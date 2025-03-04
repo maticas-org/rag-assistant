@@ -1,0 +1,14 @@
+# config.yaml
+backend:
+    llm: 
+        default:
+            provider: "ollama"
+            model_name: "llama3.2:3b"
+            parameters:
+                temperature: 0.1
+    embeddings:
+        provider: "ollama"
+        model_name: "nomic-embed-text"
+    vector_db:
+        provider: "opensearch"
+        host: "localhost"

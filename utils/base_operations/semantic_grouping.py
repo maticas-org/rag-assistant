@@ -2,7 +2,7 @@ import os
 import re
 import json
 
-from langchain_ollama.llms  import OllamaLLM
+from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
 from typing                 import List, Dict, Optional, Union
 
@@ -11,10 +11,10 @@ from utils.prompts.semantic_grouping_prompts import similarity_prompt
 # --- Semantic Grouping Function ---
 
 def semantic_grouping(
-                      llm: Union[OllamaLLM, ChatBedrockConverse],
+                      llm: Union[ChatOllama, ChatBedrockConverse],
                       json_path: str,
                       max_chunk: int = 4000,
-                      ) -> list:
+                      ) -> List[Dict[str, str]]:
     """
     Groups paragraphs semantically using Ollama LLM with non-sense detection
     and context window maintenance.
@@ -71,17 +71,9 @@ def semantic_grouping(
     if current_chunk:
         grouped.append(" ".join(current_chunk))
 
-    # Save results
-    output_path = os.path.join(
-        os.path.dirname(json_path),
-        f"grouped-{os.path.basename(json_path)}"
-    )
-    with open(output_path, 'w') as f:
-        json.dump({
+    return {
             "grouped_paragraphs": grouped,
             "processing_metadata": {
                 "average_chunk_length": sum(len(c) for c in grouped)//len(grouped) if grouped else 0
+                }
             }
-        }, f, indent=4, ensure_ascii=False)
-    
-    return grouped
