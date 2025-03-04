@@ -1,18 +1,31 @@
 import os
 import json
-from os import path
+from os import path, getenv
 from datetime import datetime
+from langchain_aws import ChatBedrockConverse
 from pdf_document_parser import extract_paragraphs_and_tables
 
 from utils.file_search          import get_files_paths_local
 from utils.semantic_grouping    import semantic_grouping
 from utils.document_summary     import summarize_document
-from utils.entity_extraction    import extract_entities
 from utils.types_identification import extract_entity_types
+from utils.entity_extraction    import extract_entities_from_paragraphs
+
+# Load the environment variables from the .env file.
+from dotenv import load_dotenv
+load_dotenv()
+
+if getenv("AWS_ACCESS_KEY_ID") and getenv("AWS_SECRET_ACCESS_KEY") and getenv("MODE") == "aws":
+    llm = ChatBedrockConverse(model = getenv("LLM_MODEL_NAME_CLOUD"),
+                              temperature = 0.1,
+                              max_tokens = None,)
+                
+    
 
 # Define the data directory relative to this file.
 BASE_DIR = path.dirname(path.realpath(__file__))
 DATA_DIR = path.join(BASE_DIR, "data")
+
 
 
 def process_pdf_files():
@@ -126,29 +139,42 @@ def extract_entities_():
     Load JSON files that start with "summarized-grouped-", extract entities from their grouped paragraphs,
     and save the output with a new key "entities" in a "third-data-extraction" folder.
     """
+    # Load the entity types from the previous step.
+    entity_types_file = path.join(DATA_DIR, "third-data-extraction", "all-entity-types.json")
+
+    with open(entity_types_file, "r", encoding="utf-8") as f:
+        entity_types = json.load(f)
+        all_entity_types = entity_types.get("all_types", [])
+        
+    # Load the grouped JSON files. And get the grouped paragraphs.
+    paragraphs = []
+    
     json_files = get_files_paths_local(DATA_DIR, extensions=["json"])
     for json_file in json_files:
         if os.path.basename(json_file).startswith("summarized-grouped-"):
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
+                grouped_paragraphs = data.get("grouped_paragraphs", [])
+                print(f"Grouped paragraphs: {len(grouped_paragraphs)}")
+                paragraphs.extend(grouped_paragraphs)
+    
+    # Build the graph documents
+    graph_docs = extract_entities_from_paragraphs(paragraphs=paragraphs,
+                                                  relevant_entity_types=all_entity_types,
+                                                  model_name="llama3.2:3b",
+                                                  verbose=False)
+                               
+    graph_docs = [doc.model_dump() for doc in graph_docs]
 
-            print("-" * 60)
-            print(f"Extracting entities: {json_file}")
-            grouped_paragraphs = data.get("grouped_paragraphs", [])
-            print(f"Grouped paragraphs: {len(grouped_paragraphs)}")
-
-            entities = extract_entities(grouped_paragraphs)
-            data["entities"] = entities
-
-            # Save the summarized JSON output to a new folder "third-data-extraction"
-            output_dir = path.join(BASE_DIR, "third-data-extraction")
-            os.makedirs(output_dir, exist_ok=True)
-            file_name = path.splitext(path.basename(json_file))[0]
-            output_file = path.join(output_dir, f"entities-{file_name}.json")
-
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-            print(f"Saved entities file: {output_file}")
+    # Save the graph documents to a JSON file.
+    filename = "all-entities.json"
+    output_file = path.join(DATA_DIR, "third-data-extraction", filename)
+    os.makedirs(path.dirname(output_file), exist_ok=True)
+    
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(graph_docs, f, ensure_ascii=False, indent=4)
+    print(f"Saved entities file: {output_file}")
+            
 
 
 if __name__ == "__main__":
@@ -163,8 +189,8 @@ if __name__ == "__main__":
     # Step 3: Summarize grouped JSON files.
     # summarize_grouped_files()
 
-    # Step 4: Extract entity types from the summarized paragraphs.
-    extract_entity_types_()
+    # Step 4: Extract entity types from the summarized documents.
+    #extract_entity_types_()
 
-    # Step 5: Extract entities from the paragraphs.
-    #extract_entities_()
+    # Step 5: Extract entities from the grouped paragraphs.
+    extract_entities_()

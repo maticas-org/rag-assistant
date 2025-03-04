@@ -1,28 +1,31 @@
 import os
 import re
 import json
-from langchain_ollama.llms import OllamaLLM
+
+from langchain_ollama.llms  import OllamaLLM
+from langchain_aws          import ChatBedrockConverse
+from typing                 import List, Dict, Optional, Union
 
 from utils.prompts.semantic_grouping_prompts import similarity_prompt
 
 # --- Semantic Grouping Function ---
 
-def semantic_grouping(json_path: str,
+def semantic_grouping(
+                      llm: Union[OllamaLLM, ChatBedrockConverse],
+                      json_path: str,
                       max_chunk: int = 4000,
-                      model_name: str = "llama3.2:1b",
-                      #model_name: str = "deepseek-r1:1.5b"
                       ) -> list:
     """
     Groups paragraphs semantically using Ollama LLM with non-sense detection
     and context window maintenance.
     """
+
     with open(json_path, 'r') as f:
         data = json.load(f)
     
     paragraphs = data['paragraphs']
     grouped = []
     current_chunk = []
-    llm = OllamaLLM(model=model_name, temperature=0.1)
     
 
     for i, para in enumerate(paragraphs):

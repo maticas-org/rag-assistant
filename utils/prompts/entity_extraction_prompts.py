@@ -9,8 +9,8 @@ entity_extraction_prompt = ChatPromptTemplate.from_template(
     Follow these rules:
     1. For each entity, create a JSON object with three fields:
        - "name": The entity’s name or label as mentioned in the text.
-       - "type": One of the following categories (use your best judgment):
-         for example ["plant", "bug", "disease", "chemical", "tool", ...]
+       - "type": One of the following relevant categories or derivated (use your best judgment):
+         for example {example_entity_types}.
        - "context": A brief (one-sentence) explanation of how this entity is referenced or what it is, based on the paragraph.
     2. Return the entities as a JSON array.
     3. If no entities are found, return an empty array `[]`.
@@ -25,16 +25,8 @@ entity_extraction_prompt = ChatPromptTemplate.from_template(
     For example:
     <entities>
     [
-        {{
-            "name": "mold",
-            "type": "disease",
-            "context": "Mold is a common disease that affects many plants."
-        }},
-        {{
-            "name": "garlic-pepper spray",
-            "type": "chemical",
-            "context": "Garlic and pepper are natural chemicals that can repel insects."
-        }}
+        json object 1,
+        json object 2,
     ]
     </entities>
 

@@ -1,8 +1,10 @@
 import re
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_aws import ChatBedrockConverse
 from langchain_ollama.llms import OllamaLLM
-from typing import List, Dict
-from tqdm import tqdm  # For cool terminal progress bars
+from langchain_core.prompts import ChatPromptTemplate
+
+from tqdm   import tqdm  # For cool terminal progress bars
+from typing import List, Dict, Optional, Union
 
 from utils.prompts.types_identification_prompts import (
     usecase_description,
@@ -12,16 +14,14 @@ from utils.prompts.types_identification_prompts import (
 )
 
 
-def extract_entity_types(summaries: List[str],
-                         model_name: str = "deepseek-r1:7b",
-                         #model_name: str = "deepseek-r1:1.5b",
-                         #model_name: str = "llama3.2:1b",
+def extract_entity_types(
+                         llm: Union[OllamaLLM, ChatBedrockConverse],
+                         summaries: List[str],
                          verbose: bool = False
                          ) -> Dict[str, List[str]]:
     """
     Identify general types of entities from a list of summaries with cool terminal progress output.
     """
-    llm = OllamaLLM(model=model_name, temperature=0.1)
     all_types: List[str] = []
     general_types: List[str] = []
     specific_types: List[str] = []
@@ -135,7 +135,7 @@ def extract_entity_types(summaries: List[str],
     print("\nEntity extraction complete. Final merged entities:", all_types, "\n")
     
     return {
-        "general_entities": all_types,
-        "specific_entities": specific_types,
-        "all_entities": all_types
+        "general_types": all_types,
+        "specific_types": specific_types,
+        "all_types": all_types
     }
