@@ -9,9 +9,9 @@ from langchain_ollama   import ChatOllama
 
 # Load the environment variables and configs
 load_dotenv()
-with open('config.yaml', 'r') as f:
+with open('config-aws.yaml', 'r') as f:
     configs = yaml.load(f, Loader=yaml.SafeLoader)
-print(f"Loaded configs:\n {configs}")
+#print(f"Loaded configs:\n {configs}")
 
 def check_env_vars():
     """
@@ -33,6 +33,35 @@ def get_default_llm() -> Union[ChatBedrockConverse, ChatOllama]:
     provider    = configs["backend"]["llm"]["default"]["provider"]
     model_name  = configs["backend"]["llm"]["default"]["model_name"]
     parameters  = configs["backend"]["llm"]["default"]["parameters"]
+
+    # Initialize the AWS LLM Converse API
+    if  provider == 'aws':
+        check_env_vars()
+        LLM = ChatBedrockConverse(
+            model = model_name,
+            **parameters
+        )
+
+    # Initialize the Ollama API
+    elif provider == 'ollama':
+        LLM = ChatOllama(
+            model = model_name,
+            **parameters
+        )
+
+    else:
+        raise Exception("Invalid LLM provider in the configs.")
+    
+    return LLM
+
+def get_semantic_grouping_llm() -> Union[ChatBedrockConverse, ChatOllama]:
+    """
+    Initialize the LLM API for semantic grouping.
+    """
+
+    provider    = configs["backend"]["llm"]["semantic_grouping"]["provider"]
+    model_name  = configs["backend"]["llm"]["semantic_grouping"]["model_name"]
+    parameters  = configs["backend"]["llm"]["semantic_grouping"]["parameters"]
 
     # Initialize the AWS LLM Converse API
     if  provider == 'aws':

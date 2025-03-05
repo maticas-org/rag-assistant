@@ -47,6 +47,15 @@ Yet this development is relevant as it will grow targeting the needs of the agri
     sudo apt-get install libleptonica-dev tesseract-ocr tesseract-ocr-eng tesseract-ocr-script-latn
     ```
 
+    Get Ollama as well as the model you want to use with the embeddings model. For example, to get the `llama3.2:3b` model, and the `nomic-embed-text` model, you can run the following commands:
+    
+    ```bash 
+    curl -fsSL https://ollama.com/install.sh | sh
+    ollama pull llama3.2:3b
+    ollama pull nomic-embed-text
+    ```
+
+
 
 3. Change configuration file if needed, the default is `config.yaml`.
     ```yaml

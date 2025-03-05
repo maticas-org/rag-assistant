@@ -6,6 +6,11 @@ backend:
             model_name: "llama3.2:3b"
             parameters:
                 temperature: 0.1
+        semantic_grouping:
+            provider: "ollama"
+            model_name: "llama3.2:1b"
+            parameters:
+                temperature: 0.1
     embeddings:
         provider: "ollama"
         model_name: "nomic-embed-text"

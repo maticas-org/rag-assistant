@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import tqdm
 
 from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
@@ -11,24 +12,21 @@ from utils.prompts.semantic_grouping_prompts import similarity_prompt
 # --- Semantic Grouping Function ---
 
 def semantic_grouping(
-                      llm: Union[ChatOllama, ChatBedrockConverse],
-                      json_path: str,
-                      max_chunk: int = 4000,
+                      llm:                      Union[ChatOllama, ChatBedrockConverse],
+                      partially_chunked_file:   str,
+                      max_chunk:                int = 4000,
+                      verbose:                  bool = False,
                       ) -> List[Dict[str, str]]:
     """
     Groups paragraphs semantically using Ollama LLM with non-sense detection
     and context window maintenance.
     """
-
-    with open(json_path, 'r') as f:
-        data = json.load(f)
     
-    paragraphs = data['paragraphs']
+    paragraphs = partially_chunked_file['paragraphs']
     grouped = []
     current_chunk = []
     
-
-    for i, para in enumerate(paragraphs):
+    for i, para in tqdm.tqdm(enumerate(paragraphs), total=len(paragraphs), desc="Semantic Grouping File level"):
         # Clean paragraph and check length
         clean_para = para["text"].strip()
             
@@ -38,19 +36,20 @@ def semantic_grouping(
             "joined_current_chunk": " ".join(current_chunk) if current_chunk else "None. Start of chunk.",
             "new_para": clean_para,
             "next_para": paragraphs[i+1] if i+1 < len(paragraphs) else "None. End of document."
-        }).strip().lower()
+        }).content.strip().lower()
 
-        print("---------------------------------------------------------")
-        print(f"Context: {grouped[-1] if grouped else 'None. Start of document.'}")
-        print(f"Current chunk: {' '.join(current_chunk) if current_chunk else 'None. Start of chunk.'}")
-        print(f"New Paragraph: {clean_para}")
+        if verbose:
+            print("---------------------------------------------------------")
+            print(f"Context: {grouped[-1] if grouped else 'None. Start of document.'}")
+            print(f"Current chunk: {' '.join(current_chunk) if current_chunk else 'None. Start of chunk.'}")
+            print(f"New Paragraph: {clean_para}")
         
         # remove the text within the <think> </think> tags from the response
         # and extract only the remaining text
-        #response = re.sub(r'<think>.*?</think>', '', response).strip()
-        response = re.sub(r'<think>[\s\S]*?</think>', '', response).strip().lower()
-        print(f"Response: {response}")
-        print("---------------------------------------------------------")
+        if verbose:
+            response = re.sub(r'<think>[\s\S]*?</think>', '', response).strip().lower()
+            print(f"Response: {response}")
+            print("---------------------------------------------------------")
 
         # Parse response robustly
         if any(kw in response for kw in ["true", "merge", "group", "yes", "join", "combine"]):

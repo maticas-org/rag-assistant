@@ -1,0 +1,19 @@
+# config.yaml
+backend:
+    llm: 
+        default:
+            provider: "aws"
+            model_name: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+            parameters:
+                temperature: 0.1
+        semantic_grouping:
+            provider: "aws"
+            model_name: "us.meta.llama3-2-3b-instruct-v1:0"
+            parameters:
+                temperature: 0.1
+    embeddings:
+        provider: "aws"
+        model_name: "amazon.titan-embed-text-v2:0"
+    vector_db:
+        provider: "opensearch"
+        host: "localhost"

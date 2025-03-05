@@ -28,7 +28,7 @@ def process_pdf_files(
 
     files = get_files_paths_local(data_dir, extensions=file_extensions)
     if verbose:
-        print(f"Found {len(files)} PDF files in {data_dir}")
+        print(f"Found {len(files)} {file_extensions} files in {data_dir}")
 
     for file in files:
         original_dir = path.dirname(file)
