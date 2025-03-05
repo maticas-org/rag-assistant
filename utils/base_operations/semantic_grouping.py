@@ -26,7 +26,7 @@ def semantic_grouping(
     grouped = []
     current_chunk = []
     
-    for i, para in tqdm.tqdm(enumerate(paragraphs), total=len(paragraphs), desc="Semantic Grouping File level"):
+    for i, para in tqdm.tqdm(enumerate(paragraphs), total=len(paragraphs), desc="Semantic Grouping [File level]"):
         # Clean paragraph and check length
         clean_para = para["text"].strip()
             

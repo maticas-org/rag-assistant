@@ -1,5 +1,6 @@
 import os
 import json
+import tqdm
 
 from os                 import path
 from typing             import List, Union
@@ -17,6 +18,7 @@ def summarize_grouped_files(
                             base_file_prefix:     str = "grouped-",
                             output_file_prefix:   str = "summarized-",
                             output_dir:           str = "third-data-extraction",
+                            max_chunk_len:        int = 6000,
                             verbose:              bool = True,
                             ) -> None:
     """
@@ -29,33 +31,42 @@ def summarize_grouped_files(
         - base_file_prefix: str - The prefix of the grouped JSON files.
         - output_file_prefix: str - The prefix of the output JSON files.
         - output_dir: str - The directory to save the summarized JSON files.
+        - max_chunk_len: int - The maximum length of the document chunks for summarization.
         - verbose: bool - Whether to print the progress.
     """
-    json_files = get_files_paths_local(data_dir, extensions=extensions)
+
+    json_files = get_files_paths_local(data_dir, extensions=extensions, file_prefix=base_file_prefix)
     output_dir = path.join(data_dir, output_dir)
     os.makedirs(output_dir, exist_ok=True)
 
+    # Load the JSON files
+    data = []
     for json_file in json_files:
+        with open(json_file, "r", encoding="utf-8") as f:
+            loaded_file = json.load(f)
+        data.append(loaded_file) 
 
-        if os.path.basename(json_file).startswith(base_file_prefix):
+    for json_file, grouped_doc in tqdm.tqdm(zip(json_files, data),
+                                            total=len(data),
+                                            desc="Summarizing grouped files"):
 
-            with open(json_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            grouped_paragraphs = data.get("grouped_paragraphs", [])
+        if verbose:
+            print("-" * 60)
+            print(f"Summarizing: {json_file}")
 
-            if verbose:
-                print("-" * 60)
-                print(f"Summarizing: {json_file}")
-                print(f"Grouped paragraphs: {len(grouped_paragraphs)}")
+        grouped_paragraphs      = grouped_doc.get("grouped_paragraphs", [])
+        summary                 = summarize_document(llm=llm,
+                                                     document=grouped_paragraphs,
+                                                     verbose=verbose,
+                                                     max_document_len=max_chunk_len)
+        grouped_doc["summary"]  = summary
 
-            summary = summarize_document(grouped_paragraphs)
-            data["summary"] = summary
+        # Save the summarized JSON file
+        file_name   = path.splitext(path.basename(json_file))[0]
+        output_file = path.join(output_dir, f"{output_file_prefix}{file_name}.json")
 
-            file_name = path.splitext(path.basename(json_file))[0]
-            output_file = path.join(output_dir, f"{output_file_prefix}{file_name}.json")
-
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(grouped_doc, f, ensure_ascii=False, indent=4)
             
-            if verbose:
-                print(f"Saved summarized file: {output_file}")
+        if verbose:
+            print(f"Saved summarized file: {output_file}")
