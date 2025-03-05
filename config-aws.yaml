@@ -16,6 +16,11 @@ backend:
             model_name: "us.anthropic.claude-3-5-haiku-20241022-v1:0"
             parameters:
                 temperature: 0.1
+        extract_entity_types:
+            provider: "aws"
+            model_name: "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+            parameters:
+                temperature: 0.1
 
     embeddings:
         provider: "aws"

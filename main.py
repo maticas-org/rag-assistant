@@ -6,7 +6,7 @@ from os         import path
 from datetime   import datetime
 
 # Pipeline steps
-from init                                       import get_llm
+from utils.init                                 import get_llm
 from pipeline.s1_read_and_extract_text          import process_pdf_files
 from pipeline.s2_semantically_group_paragraphs  import process_semantic_grouping
 from pipeline.s3_summarize_grouped_files        import summarize_grouped_files
@@ -37,7 +37,11 @@ if __name__ == "__main__":
     #)
 
     # Step 4: Extract entity types from the summarized documents.
-    #extract_entity_types_()
+    #extract_entity_types_(
+    #    llm                 = get_llm(usecase="extract_entity_types"),
+    #    data_dir            = DATA_DIR,
+    #)
+
 
     # Step 5: Extract entities from the grouped paragraphs.
     #extract_entities_()

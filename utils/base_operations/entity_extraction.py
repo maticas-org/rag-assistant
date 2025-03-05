@@ -107,7 +107,7 @@ def extract_entities_from_paragraphs(
         
         # Clean and extract the entities from the response
         entities_ = extract_entities_from_response(response, verbose)
-        entities_ = [entity.dict() for entity in entities_]
+        entities_ = [entity.model_dump() for entity in entities_]
         entities.append(entities_)
         entity_count += len(entities_)
 

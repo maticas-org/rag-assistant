@@ -4,7 +4,7 @@ from os         import path
 from datetime   import datetime
 from typing     import Dict, List
 
-from pdf_document_parser                import extract_paragraphs_and_tables
+from utils.pdf_document_parser                import extract_paragraphs_and_tables
 from utils.base_operations.file_search  import get_files_paths_local
 
 def process_pdf_files(

@@ -45,7 +45,7 @@ def extract_entity_types_(
                 summary = data.get("summary", [])
                 all_summaries.append(summary)
                 
-    types = extract_entity_types(all_summaries, verbose=True)
+    types = extract_entity_types(llm, all_summaries, verbose=True)
 
     # Save the entity types to a JSON file.
     output_file = path.join(data_dir, output_dir, output_file_name)
