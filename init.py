@@ -24,15 +24,16 @@ def check_env_vars():
         if var not in os.environ:
             raise Exception(f"Environment variable {var} is not set.")
 
+def get_llm(usecase: str = "default") -> Union[ChatBedrockConverse, ChatOllama]:
 
-def get_default_llm() -> Union[ChatBedrockConverse, ChatOllama]:
-    """
-    Initialize the LLM API.
-    """
+    allowed_usecases = ["default", "semantic_grouping", "summary"]
 
-    provider    = configs["backend"]["llm"]["default"]["provider"]
-    model_name  = configs["backend"]["llm"]["default"]["model_name"]
-    parameters  = configs["backend"]["llm"]["default"]["parameters"]
+    if usecase not in allowed_usecases:
+        raise Exception(f"Invalid LLM usecase: {usecase}")
+    
+    provider    = configs["backend"]["llm"][usecase]["provider"]
+    model_name  = configs["backend"]["llm"][usecase]["model_name"]
+    parameters  = configs["backend"]["llm"][usecase]["parameters"]
 
     # Initialize the AWS LLM Converse API
     if  provider == 'aws':
@@ -41,7 +42,7 @@ def get_default_llm() -> Union[ChatBedrockConverse, ChatOllama]:
             model = model_name,
             **parameters
         )
-
+    
     # Initialize the Ollama API
     elif provider == 'ollama':
         LLM = ChatOllama(
@@ -51,34 +52,5 @@ def get_default_llm() -> Union[ChatBedrockConverse, ChatOllama]:
 
     else:
         raise Exception("Invalid LLM provider in the configs.")
-    
-    return LLM
 
-def get_semantic_grouping_llm() -> Union[ChatBedrockConverse, ChatOllama]:
-    """
-    Initialize the LLM API for semantic grouping.
-    """
-
-    provider    = configs["backend"]["llm"]["semantic_grouping"]["provider"]
-    model_name  = configs["backend"]["llm"]["semantic_grouping"]["model_name"]
-    parameters  = configs["backend"]["llm"]["semantic_grouping"]["parameters"]
-
-    # Initialize the AWS LLM Converse API
-    if  provider == 'aws':
-        check_env_vars()
-        LLM = ChatBedrockConverse(
-            model = model_name,
-            **parameters
-        )
-
-    # Initialize the Ollama API
-    elif provider == 'ollama':
-        LLM = ChatOllama(
-            model = model_name,
-            **parameters
-        )
-
-    else:
-        raise Exception("Invalid LLM provider in the configs.")
-    
     return LLM
