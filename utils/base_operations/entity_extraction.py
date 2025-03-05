@@ -1,5 +1,6 @@
 import re
 import json
+from datetime import datetime
 
 from typing             import List, Dict, Optional, Union
 from pydantic           import BaseModel
@@ -62,11 +63,11 @@ def extract_entities_from_response(response: str, verbose: bool = False) -> List
 
 def extract_entities_from_paragraphs(
                                         llm:                    Union[ChatOllama, ChatBedrockConverse],                 
-                                        paragraphs:             List[str],
+                                        paragraphs:             List[Dict[str, str]],
                                         relevant_entity_types:  List[str] = [],
                                         usecase_context:        str = "",
                                         verbose:                bool = False
-                                     ) -> List[List[Entity]]:
+                                     ) -> Dict[str, List[Entity]]:
     
     """
         Extract entities from given paragraphs using the provided language model as well as the relevant entity types,
@@ -80,9 +81,6 @@ def extract_entities_from_paragraphs(
             - verbose: bool - Whether to print the progress.
     """
 
-    # Set up some variables
-    entities: List[Entity] = []
-
     # Set the example entity types based on the context or the relevant entity types.
     if not relevant_entity_types and usecase_context:
         example_entity_types = f"Example entity types should adjust to this context: {usecase_context}"
@@ -91,16 +89,17 @@ def extract_entities_from_paragraphs(
     elif not relevant_entity_types and not usecase_context:
         example_entity_types = "There are no example entity types to adjust to. Feel free to extract any entities."
 
-
     # Initialize the progress bar
     progress_bar = tqdm(total=len(paragraphs), desc="Extracting Entities from paragraph")
     entity_count = 0
 
-    for paragraph in paragraphs:
+    for p in paragraphs:
+        ptext = p["text"]
+
         response = (entity_extraction_prompt | llm).invoke({
-            "paragraph_text": paragraph,
+            "paragraph_text": ptext,
             "example_entity_types": example_entity_types
-        }).strip()
+        }).content.strip()
         
         #if verbose:
         #    tqdm.write(f"Response from entity extraction: {response}")
@@ -108,12 +107,14 @@ def extract_entities_from_paragraphs(
         # Clean and extract the entities from the response
         entities_ = extract_entities_from_response(response, verbose)
         entities_ = [entity.model_dump() for entity in entities_]
-        entities.append(entities_)
-        entity_count += len(entities_)
+        p["entities"] = entities_
+
 
         # Update the progress bar
+        entity_count += len(entities_)
         progress_bar.update(1)
         progress_bar.set_postfix(entity_count=entity_count)
     
     progress_bar.close()
-    return entities
+
+    return paragraphs

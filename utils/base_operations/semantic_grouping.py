@@ -1,6 +1,5 @@
-import os
 import re
-import json
+import hashlib
 import tqdm
 
 from langchain_ollama       import ChatOllama
@@ -13,7 +12,7 @@ from utils.prompts.semantic_grouping_prompts import similarity_prompt
 
 def semantic_grouping(
                       llm:                      Union[ChatOllama, ChatBedrockConverse],
-                      partially_chunked_file:   str,
+                      partially_chunked_file:   Dict[str, str],
                       max_chunk:                int = 4000,
                       verbose:                  bool = False,
                       ) -> List[Dict[str, str]]:
@@ -70,9 +69,11 @@ def semantic_grouping(
     if current_chunk:
         grouped.append(" ".join(current_chunk))
 
+    grouped = [{"text": chunk, "chunk_id": hashlib.md5(chunk.encode()).hexdigest()} for chunk in grouped]
+
     return {
             "grouped_paragraphs": grouped,
             "processing_metadata": {
-                "average_chunk_length": sum(len(c) for c in grouped)//len(grouped) if grouped else 0
+                "average_chunk_length": sum(len(c) for c in [g["text"] for g in grouped])//len(grouped) if grouped else 0
                 }
             }

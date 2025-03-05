@@ -25,9 +25,13 @@ def check_env_vars():
             raise Exception(f"Environment variable {var} is not set.")
 
 def get_llm(usecase: str = "default") -> Union[ChatBedrockConverse, ChatOllama]:
+    """
+    Initialize the LLM API based on the usecase.
+    """
 
     allowed_usecases = ["default", "semantic_grouping",
-                        "summary", "extract_entity_types"]
+                        "summary", "extract_entity_types",
+                        "extract_entities"]
 
     if usecase not in allowed_usecases:
         raise Exception(f"Invalid LLM usecase: {usecase}. Allowed values are: {allowed_usecases}")

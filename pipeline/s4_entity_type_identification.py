@@ -18,7 +18,7 @@ def extract_entity_types_(
                             base_file_prefix:     str = "summarized-",
                             output_dir:           str = "fourth-data-extraction",
                             output_file_name:     str = "all-entity-types.json",
-                            verbose:              bool = True,
+                            verbose:              bool = False,
                         ) -> None:
 
     """

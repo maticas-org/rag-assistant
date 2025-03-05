@@ -1,7 +1,9 @@
 import os
 import json
 import tqdm
+import hashlib
 
+from datetime           import datetime
 from os                 import path
 from typing             import List, Union
 from langchain_ollama   import ChatOllama
@@ -19,7 +21,7 @@ def summarize_grouped_files(
                             output_file_prefix:   str = "summarized-",
                             output_dir:           str = "third-data-extraction",
                             max_chunk_len:        int = 6000,
-                            verbose:              bool = True,
+                            verbose:              bool = False,
                             ) -> None:
     """
     Load JSON files that start with "grouped-", summarize their grouped paragraphs,
@@ -54,12 +56,20 @@ def summarize_grouped_files(
             print("-" * 60)
             print(f"Summarizing: {json_file}")
 
-        grouped_paragraphs      = grouped_doc.get("grouped_paragraphs", [])
-        summary                 = summarize_document(llm=llm,
-                                                     document=grouped_paragraphs,
-                                                     verbose=verbose,
-                                                     max_document_len=max_chunk_len)
+        summary = summarize_document(llm=llm,
+                                     document=grouped_doc,
+                                     verbose=verbose,
+                                     max_document_len=max_chunk_len)
         grouped_doc["summary"]  = summary
+        
+        # Add metadata to the summarized document
+        grouped_doc["metadata"].update({
+            "summarized_timestamp": datetime.now().isoformat(),
+            "summarized_by": "summarize_grouped_files"
+        })
+        grouped_doc["metadata"].update({
+            "file_hash": hashlib.md5(json.dumps(data).encode()).hexdigest(),
+        })
 
         # Save the summarized JSON file
         file_name   = path.splitext(path.basename(json_file))[0]

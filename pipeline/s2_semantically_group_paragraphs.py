@@ -1,7 +1,9 @@
 import os   
 import json
 import tqdm
+import hashlib 
 
+from datetime               import datetime
 from typing                 import List, Union
 from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
@@ -55,10 +57,21 @@ def process_semantic_grouping(
         grouped = semantic_grouping(llm, partially_chunked_file, max_merged_chunk_len, verbose)
         if verbose:
             print(f"Semantically grouped: {json_file}")
-            
+        
+        # Add metadata to the grouped paragraphs
+        grouped["metadata"] = {
+            "source": json_file,
+            "grouped_timestamp": datetime.now().isoformat(),
+            "grouped_by": "semantic_grouping",
+        }
+        grouped["metadata"]["file_hash"] = hashlib.md5(json.dumps(grouped).encode()).hexdigest()
+
         # Save the grouped paragraphs to a new JSON file
         output_file = os.path.join(output_dir, f"{output_file_prefix}{os.path.basename(json_file)}")
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(grouped, f, ensure_ascii=False, indent = 4)
+
+        # Only process the first file for now
+        break
 
 

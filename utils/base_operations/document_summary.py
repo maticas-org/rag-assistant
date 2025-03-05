@@ -25,6 +25,9 @@ def summarize_document(
          max_document_length (int): Maximum length of the context window for the LLM.
          model_name (str): Name of the LLM model to use.
     """
+
+    document = document.get("grouped_paragraphs", [])
+    document = [para["text"] for para in document]
     
     # Fist, we will split the document into chunks of max_document_length at most
     document_splits = [document[0], ]

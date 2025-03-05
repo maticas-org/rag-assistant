@@ -44,5 +44,9 @@ if __name__ == "__main__":
 
 
     # Step 5: Extract entities from the grouped paragraphs.
-    #extract_entities_()
+    #extract_entities_(
+    #    llm                 = get_llm(usecase="extract_entities"),
+    #    data_dir            = DATA_DIR,
+    #)
+
     pass

@@ -1,6 +1,8 @@
 import os
 import json
+import hashlib
 
+from datetime           import datetime
 from os                 import path
 from typing             import List, Union
 from langchain_ollama   import ChatOllama
@@ -18,7 +20,7 @@ def extract_entities_(
                         base_file_prefix:           str = "summarized-grouped-",
                         base_typology_file_path:    str = "fourth-data-extraction/all-entity-types.json",
                         output_dir:                 str = "fifth-data-extraction",
-                        verbose:                    bool = True,  
+                        verbose:                    bool = False,  
                     ) -> None:
 
     """
@@ -35,33 +37,36 @@ def extract_entities_(
 
     with open(entity_types_file, "r", encoding="utf-8") as f:
         entity_types = json.load(f)
-        all_entity_types = entity_types.get("all_types", [])
-        
+        merged_entity_types = entity_types.get("merged_types", [])
     
     # Load the JSON files that start with "summarized-grouped-".
-    json_files = get_files_paths_local(data_dir, extensions=extensions)
+    json_files = get_files_paths_local(data_dir, extensions=extensions, file_prefix=base_file_prefix)
 
     for json_file in json_files:
 
-        if os.path.basename(json_file).startswith(base_file_prefix):
-
-            # Load the grouped paragraphs from the JSON file.
-            with open(json_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                grouped_paragraphs = data.get("grouped_paragraphs", [])
-                print(f"Grouped paragraphs: {len(grouped_paragraphs)}")
+        # Load the grouped paragraphs from the JSON file.
+        with open(json_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            grouped_paragraphs = data.get("grouped_paragraphs", [])
     
-            # extract entities from the grouped paragraphs 
-            entities = extract_entities_from_paragraphs(
-                                                            llm                     = llm,
-                                                            paragraphs              = grouped_paragraphs,
-                                                            relevant_entity_types   = all_entity_types,
-                                                            verbose                 = False
-                                                        )
-            data["entities"] = entities
+        # extract entities from the grouped paragraphs 
+        paragraphs_with_entities = extract_entities_from_paragraphs(
+                                                                    llm                     = llm,
+                                                                    paragraphs              = grouped_paragraphs,
+                                                                    relevant_entity_types   = merged_entity_types,
+                                                                    verbose                 = False
+                                                    )
+        data["grouped_paragraphs"] = paragraphs_with_entities
+
+        # Add metadata to the summarized document
+        data["metadata"].update({
+            "entity_extraction_timestamp": datetime.isoformat(datetime.now()),
+        })
+        data["metadata"].update({
+            "file_hash": hashlib.md5(json.dumps(data).encode()).hexdigest(),
+        })
                                
-            # Save the entities to a JSON file.
-            output_file = path.join(output_dir, os.path.basename(json_file))
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)    
-        
+        # Save the entities to a JSON file.
+        output_file = path.join(output_dir, os.path.basename(json_file))
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)    
