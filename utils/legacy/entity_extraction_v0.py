@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 from langchain_ollama.llms import OllamaLLM
 
-from utils.prompts.entity_extraction_prompts import (entity_extraction_prompt,
+from utils.prompts.graphrag.entity_extraction_prompts import (entity_extraction_prompt,
                                                      missing_entity_check_prompt,
                                                      additional_entity_extraction_prompt)
 

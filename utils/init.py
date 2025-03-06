@@ -31,7 +31,7 @@ def get_llm(usecase: str = "default") -> Union[ChatBedrockConverse, ChatOllama]:
 
     allowed_usecases = ["default", "semantic_grouping",
                         "summary", "extract_entity_types",
-                        "extract_entities"]
+                        "extract_entities", "relate_entities"]
 
     if usecase not in allowed_usecases:
         raise Exception(f"Invalid LLM usecase: {usecase}. Allowed values are: {allowed_usecases}")

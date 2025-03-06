@@ -5,7 +5,7 @@ from typing                 import List, Dict, Union
 from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
 
-from utils.prompts.summary_prompts import summarize_prompt, summary_of_summaries_prompt
+from utils.prompts.graphrag.summary_prompts import summarize_prompt, summary_of_summaries_prompt
 
 
 def summarize_document(

@@ -3,17 +3,12 @@ import json
 from datetime import datetime
 
 from typing             import List, Dict, Optional, Union
-from pydantic           import BaseModel
 from langchain_ollama   import ChatOllama
 from langchain_aws      import ChatBedrockConverse
 from tqdm               import tqdm
 
-from utils.prompts.entity_extraction_prompts import entity_extraction_prompt
-
-class Entity(BaseModel):
-    name: str
-    type: Optional[str] = None
-    context: str
+from utils.models.graphrag_models import Entity
+from utils.prompts.graphrag.entity_extraction_prompts import entity_extraction_prompt
     
 
 def clean_response(response: str, verbose: bool = False) -> str:
