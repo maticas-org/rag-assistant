@@ -12,6 +12,7 @@ from pipeline.s2_semantically_group_paragraphs  import process_semantic_grouping
 from pipeline.s3_summarize_grouped_files        import summarize_grouped_files
 from pipeline.s4_entity_type_identification     import extract_entity_types_
 from pipeline.s5_extract_entities               import extract_entities_
+from pipeline.s6_relate_entities                import relate_entities_
 
 # Define the data directory relative to this file.
 BASE_DIR = path.dirname(path.realpath(__file__))
@@ -42,11 +43,16 @@ if __name__ == "__main__":
     #    data_dir            = DATA_DIR,
     #)
 
-
     # Step 5: Extract entities from the grouped paragraphs.
     #extract_entities_(
     #    llm                 = get_llm(usecase="extract_entities"),
     #    data_dir            = DATA_DIR,
     #)
+
+    # Step 6: Relate entities to each other.
+    relate_entities_(
+        llm                 = get_llm(usecase="relate_entities"),
+        data_dir            = DATA_DIR,
+    )
 
     pass
