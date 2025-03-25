@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from tqdm   import tqdm  # For cool terminal progress bars
 from typing import List, Dict, Optional, Union
 
-from utils.prompts.graphrag.types_identification_prompts import (
+from utils.prompts.general.types_identification_prompts import (
     usecase_description,
     general_ent_type_extraction_prompt,
     specific_ent_type_extraction_prompt,

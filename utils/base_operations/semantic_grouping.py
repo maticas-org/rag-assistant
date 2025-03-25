@@ -6,7 +6,7 @@ from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
 from typing                 import List, Dict, Optional, Union
 
-from utils.prompts.graphrag.semantic_grouping_prompts import similarity_prompt
+from utils.prompts.general.semantic_grouping_prompts import similarity_prompt
 
 # --- Semantic Grouping Function ---
 

@@ -6,13 +6,13 @@ from os         import path
 from datetime   import datetime
 
 # Pipeline steps
-from utils.init                                 import get_llm
-from pipeline.s1_read_and_extract_text          import process_pdf_files
-from pipeline.s2_semantically_group_paragraphs  import process_semantic_grouping
-from pipeline.s3_summarize_grouped_files        import summarize_grouped_files
-from pipeline.s4_entity_type_identification     import extract_entity_types_
-from pipeline.s5_extract_entities               import extract_entities_
-from pipeline.s6_relate_entities                import relate_entities_
+from utils.init                                             import get_llm
+from pipeline.general.s1_read_and_extract_text              import process_pdf_files
+from pipeline.general.s2_semantically_group_paragraphs      import process_semantic_grouping
+from pipeline.general.s3_summarize_grouped_files            import summarize_grouped_files
+from pipeline.graph_rag.s1_entity_type_identification       import extract_entity_types_
+from pipeline.graph_rag.s2_extract_entities                 import extract_entities_
+from pipeline.graph_rag.s3_relate_entities                  import relate_entities_
 
 # Define the data directory relative to this file.
 BASE_DIR = path.dirname(path.realpath(__file__))
@@ -50,9 +50,9 @@ if __name__ == "__main__":
     #)
 
     # Step 6: Relate entities to each other.
-    relate_entities_(
-        llm                 = get_llm(usecase="relate_entities"),
-        data_dir            = DATA_DIR,
-    )
+    #relate_entities_(
+    #    llm                 = get_llm(usecase="relate_entities"),
+    #    data_dir            = DATA_DIR,
+    #)
 
     pass
