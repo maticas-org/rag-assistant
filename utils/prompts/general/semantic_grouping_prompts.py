@@ -10,7 +10,13 @@ similarity_prompt = ChatPromptTemplate.from_template(
     1. Narrative continuity
     2. Topic consistency
     3. Presence of gibberish/non-sense
+
     Respond ONLY with: true/false, longer explanations are not needed and 
     are penalized. You can also use <think> tags to indicate your thought process.
+    Please start your reasoning with <think> and end it with </think>.
+
+    Example Response:
+    '<think>Yes, the new paragraph should be grouped because it continues the previous topic.</think>
+    answer: true'
     """
 )

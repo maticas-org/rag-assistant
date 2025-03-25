@@ -9,17 +9,18 @@ from langchain_ollama       import ChatOllama
 from langchain_aws          import ChatBedrockConverse
 
 # Local imports
+from utils.models.document_processing           import BaseFile
 from utils.base_operations.file_search          import get_files_paths_local
 from utils.base_operations.semantic_grouping    import semantic_grouping
 
-def process_semantic_grouping(
+def semantic_grouping_(
                               llm:                  Union[ChatOllama, ChatBedrockConverse],
                               data_dir:             str,
                               extensions:           List[str] = ["json"], 
                               base_file_prefix:     str = "processed-",
                               max_merged_chunk_len: int = 4000,
                               output_file_prefix:   str = "grouped-",
-                              output_dir:           str = "second-data-extraction",
+                              output_dir_full_path: str = "second-data-extraction",
                               verbose:              bool = False,
                               ) -> None:
     """
@@ -35,39 +36,33 @@ def process_semantic_grouping(
         - output_dir: str - The directory to save the grouped JSON files.
     """
     # Create the output directory
-    output_dir = os.path.join(data_dir, output_dir)
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir_full_path, exist_ok=True)
 
-    json_files = get_files_paths_local(data_dir,
-                                       extensions   =   extensions,
-                                       file_prefix  =   base_file_prefix,
-                                       verbose      =   verbose)
-
-    # Load the JSON files
-    data = []
-    for json_file in json_files:
-        with open(json_file, 'r') as f:
-            data.append(json.load(f))
-    
+    json_files = get_files_paths_local(directory_path   = data_dir,
+                                       extensions       = extensions,
+                                       file_prefix      = base_file_prefix,
+                                       verbose          = verbose)
 
     # Apply semantic grouping to each JSON file
-    for partially_chunked_file, json_file in tqdm.tqdm(zip(data, json_files), total=len(data), desc="Semantic Grouping"):
+    for json_file in tqdm.tqdm(json_files, desc="Semantic Grouping"):
+
+        # Load the JSON file
+        with open(json_file, 'r') as f:
+            partially_chunked_file = json.load(f)
+            partially_chunked_file = BaseFile(**partially_chunked_file)
 
         # Apply semantic grouping
         grouped = semantic_grouping(llm, partially_chunked_file, max_merged_chunk_len, verbose)
-        if verbose:
-            print(f"Semantically grouped: {json_file}")
-        
-        # Add metadata to the grouped paragraphs
-        grouped["metadata"] = {
-            "source": json_file,
-            "grouped_timestamp": datetime.now().isoformat(),
-            "grouped_by": "semantic_grouping",
-        }
+        grouped = grouped.model_dump()
         grouped["metadata"]["file_hash"] = hashlib.md5(json.dumps(grouped).encode()).hexdigest()
 
+        if verbose:
+            print(f"Semantically grouped: {json_file}")
+
         # Save the grouped paragraphs to a new JSON file
-        output_file = os.path.join(output_dir, f"{output_file_prefix}{os.path.basename(json_file)}")
+        filename = f"{output_file_prefix}{os.path.basename(json_file.replace(base_file_prefix, ''))}"
+        output_file = os.path.join(output_dir_full_path, filename)
+
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(grouped, f, ensure_ascii=False, indent = 4)
 

@@ -19,7 +19,7 @@ dependencies = [
     "pyvis>=0.3.2",
     "pyyaml>=6.0.2",
     "tqdm>=4.67.1",
-    "unstructured>=0.16.20",
+    "unstructured[all-docs]>=0.16.20",
     "unstructured-inference>=0.8.7",
     "unstructured-pytesseract>=0.3.13",
 ]

@@ -39,6 +39,21 @@ Yet this development is relevant as *it will grow targeting the needs of the agr
     ```bash
     git clone https://github.com/maticas-org/rag-assistant.git
     ```
+
+    Install the nano-graphrag package, it's important to do it this way because the package is not yet published in PyPi, and we want the AWS Bedrock support.
+
+    ```bash
+    uv pip install git+https://github.com/gusye1234/nano-graphrag.git
+    ```
+
+    Install unstructured dependencies for text extraction:
+    pandoc, libmagic, poppler, libreoffice, and tesseract.
+    For example, on an Ubuntu linux machine you can run the following command:
+
+    ```bash
+    sudo apt-get install pandoc libmagic1 poppler-utils libreoffice tesseract-ocr
+    ```
+
 2. Install the dependencies.
 
     ```bash

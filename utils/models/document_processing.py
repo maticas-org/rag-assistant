@@ -46,7 +46,7 @@ class Metadata(BaseModel):
         The metadata is a dictionary that contains the information of the processed file.
     """
     file_hash:                  str
-    processing_date:            str
+    extraction_date:            str
     original_full_file_path:    str
     grouping_info:              Optional[GroupingInfo]
     summary_info:               Optional[SummaryInfo]
@@ -55,6 +55,9 @@ class Metadata(BaseModel):
 # ------------------------------
 #          Base File
 # ------------------------------
+
+class Table(BaseModel):
+    text:     str
 
 class Paragraph(BaseModel):
     text:       str
@@ -65,10 +68,11 @@ class Paragraph(BaseModel):
 
 class BaseFile(BaseModel):
     """
-        The processed file refer to the first output of the pipeline, which is the result of the OCR process,
+        The processed file refer to the output of the pipeline, which is the result of the OCR process,
+        semantic grouping, and summarization. It is a structured representation of the processed file,
         that grabs the text and tables from the files and stores them in a structured way.
     """
     paragraphs: List[Paragraph]
-    tables:     List[str]
+    tables:     List[Table]
     metadata:   Metadata
     summary:    Optional[str]

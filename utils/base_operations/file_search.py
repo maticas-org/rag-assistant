@@ -1,9 +1,10 @@
 from os import walk, path, listdir
 
-def get_files_paths_local(directory_path: str, 
-                          extensions: list,
-                          file_prefix: str = None,
-                          verbose: bool = False
+def get_files_paths_local(
+                            directory_path: str, 
+                            extensions: list,
+                            file_prefix: str = None,
+                            verbose: bool = False
                           ) -> list:
     """
         This function takes a directory path and returns a list of file paths
